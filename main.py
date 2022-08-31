@@ -1,16 +1,26 @@
-# This is a sample Python script.
+import requests_cache
+import wikitextparser
+from deep_get import deep_get
+from parse_wiki import parse_wiki
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+endpoint = "https://wiki.supercombo.gg/api.php"
+params = {'action': 'query',
+          'format': 'json',
+          'prop': 'revisions',
+          'pageids': 60960,
+          'utf8': 1,
+          'formatversion': 2,
+          'rvprop': 'content',
+          'rvslots': '*'}
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def main():
+    session = requests_cache.CachedSession()
+    response = session.get(endpoint, params=params)
+    body = deep_get(response.json(), 'query', 'pages', 0, 'revisions', 0, 'slots', 'main', 'content')
+    wiki = wikitextparser.parse(body)
+    result = parse_wiki(wiki)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()
